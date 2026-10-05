@@ -5,15 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f5ef">
   <meta name="description" content="Portfolio case study: designing a competitive intelligence pipeline with n8n, PostgreSQL, Redis, MinIO, and tiered AI analysis.">
+  <meta name="demo-api-url" content="https://proxy-ne3o.onrender.com/api/run">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Competitive Intelligence Pipeline — Portfolio Case Study">
   <meta property="og:description" content="A case study in designing an automated competitive intelligence pipeline, with an interactive synthetic-data demo.">
-  <meta property="og:image" content="https://YOUR-SITE.onrender.com/architecture.png">
-  <meta property="og:url" content="https://YOUR-SITE.onrender.com/">
+  <meta property="og:image" content="https://competitive-intelligence-platform.onrender.com/architecture.png">
+  <meta property="og:url" content="https://competitive-intelligence-platform.onrender.com/">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Competitive Intelligence Pipeline — Portfolio Case Study">
   <meta name="twitter:description" content="A case study in designing an automated competitive intelligence pipeline, with an interactive synthetic-data demo.">
-  <meta name="twitter:image" content="https://YOUR-SITE.onrender.com/architecture.png">
+  <meta name="twitter:image" content="https://competitive-intelligence-platform.onrender.com/architecture.png">
   <title>Competitive Intelligence Pipeline — Portfolio Case Study</title>
   <link rel="stylesheet" href="site.css">
   <link rel="stylesheet" href="demo-branch.css">
@@ -34,7 +35,7 @@
         <h1>From scattered market signals to <em>useful intelligence.</em></h1>
         <p class="lede">A case study in designing an automated competitive intelligence pipeline: collect evidence, remove duplicates, analyze signals in tiers, and route the findings to people who need them.</p>
         <div class="hero-actions"><a class="button button-dark" href="#case-study">Read the case study <span>↓</span></a><a class="text-link" href="#demo">Try the sample demo <span>↘</span></a></div>
-        <p class="disclosure"><strong>Portfolio presentation.</strong> The enterprise engagement and this synthetic demo are separate. The demo uses sample data and does not connect to the original system or live AI providers.</p>
+            <p class="disclosure"><strong>Portfolio presentation.</strong> This demo uses synthetic sample signals and connects to the portfolio demo API, which relays requests to the n8n workflow when configured. Local mock results appear if the API is unavailable.</p>
       </div>
       <div class="hero-art" aria-label="Illustration of signal intake, analysis, and delivery">
         <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
@@ -67,9 +68,9 @@
     </section>
 
     <section class="demo-section" id="demo">
-      <div class="demo-head"><div><p class="eyebrow">02 / INTERACTIVE SAMPLE</p><h2>Follow a signal through the pipeline.</h2><p>This is a local, deterministic illustration using invented company names and sample content. It does not call Gemini or Claude, write to a database, or represent a production execution.</p></div><div class="demo-stamp">SYNTHETIC<br>DATA ONLY</div></div>
+      <div class="demo-head"><div><p class="eyebrow">02 / LIVE WORKFLOW DEMO</p><h2>Follow a signal through the pipeline.</h2><p>Run a synthetic signal through the demo API and n8n workflow. If the API is unavailable, the page shows a clearly labeled local mock result.</p></div><div class="demo-stamp">SYNTHETIC<br>DATA ONLY</div></div>
       <div class="demo-app">
-        <div class="demo-controls"><div class="signal-control"><label for="signal-select">CHOOSE A SAMPLE SIGNAL</label><select id="signal-select"><option value="high">Northstar launches a new analytics tier</option><option value="mid">Pioneer hires a VP of enterprise sales</option><option value="low">Meridian announces a regional partnership</option></select></div><div class="threshold-control"><label for="threshold-input">TIER 2 THRESHOLD <output id="threshold-value" for="threshold-input">0.85</output></label><input id="threshold-input" type="range" min="0.50" max="0.99" step="0.01" value="0.85"><div class="range-hints"><span>0.50 · fewer escalations</span><span>0.99 · more scrutiny</span></div></div><button id="run-demo" class="button button-dark" type="button"><span id="run-label">Run sample flow</span><span aria-hidden="true">↗</span></button></div>
+        <div class="demo-controls"><div class="signal-control"><label for="signal-select">CHOOSE A SAMPLE SIGNAL</label><select id="signal-select"><option value="high">Northstar launches a new analytics tier</option><option value="mid">Pioneer hires a VP of enterprise sales</option><option value="low">Meridian announces a regional partnership</option></select></div><div class="threshold-control"><label for="threshold-input">TIER 2 THRESHOLD <output id="threshold-value" for="threshold-input">0.85</output></label><input id="threshold-input" type="range" min="0.50" max="0.99" step="0.01" value="0.85"><div class="range-hints"><span>0.50 · fewer escalations</span><span>0.99 · more scrutiny</span></div></div><button id="run-demo" class="button button-dark" type="button"><span id="run-label">Run demo</span><span aria-hidden="true">↗</span></button></div>
         <div class="pipeline-steps" aria-label="Pipeline stages">
           <div class="main-track">
             <div class="pipe-step active" data-step="0"><span>01</span><b>Ingest</b><small>source captured</small></div><i aria-hidden="true">→</i>
@@ -84,7 +85,7 @@
           <div class="merge-track"><span>Both routes continue</span><i aria-hidden="true">↓</i><div class="pipe-step store-step" data-step="5"><span>06</span><b>Store</b><small>analysis + evidence</small></div></div>
         </div>
         <div id="demo-result" class="demo-result" aria-live="polite"><div class="result-symbol">✳</div><div><p class="eyebrow">READY WHEN YOU ARE</p><h3>Select a sample signal and run the flow.</h3><p>The display will show a simulated analysis result and whether the policy accepts it or sends it for deeper review.</p></div><span class="result-badge">SAMPLE</span></div>
-        <div class="demo-foot"><span><i class="legend-dot"></i> Example content only</span><span>Tier 1 confidence is fixed for each sample; the threshold changes the route.</span><span>No external services connected</span></div>
+        <div class="demo-foot"><span><i class="legend-dot"></i> Synthetic sample signals</span><span>Returned analysis and route are shown from the workflow response.</span><span>Live n8n · API mock · local fallback</span></div>
       </div>
     </section>
 
