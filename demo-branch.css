@@ -11,6 +11,17 @@
 .connection-status[data-state="live"]:before{background:#147e68}
 .connection-status[data-state="mock"]:before{background:#bd8334}
 .connection-status[data-state="fallback"]:before{background:#ce6548}
+.demo-result{align-items:flex-start}
+.demo-result>div:nth-child(2){flex:1;min-width:0;padding-right:150px}
+.analysis-details{margin-top:18px;padding-top:14px;border-top:1px solid #deded5}
+.analysis-details>h4{margin:0 0 12px;font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#777a71}
+.analysis-tier+.analysis-tier{margin-top:14px}
+.analysis-tier h5{margin:0 0 7px;font:600 12px var(--sans);color:#30332d}
+.analysis-tier dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:0}
+.analysis-field{min-width:0;padding:9px 10px;background:#fafaf6;border:1px solid #e8e8e0}
+.analysis-field dt{margin:0 0 5px;font:9px var(--mono);letter-spacing:.05em;text-transform:capitalize;color:#777a71}
+.analysis-field dd{margin:0;font-size:11px;line-height:1.5;color:#30332d;white-space:pre-wrap;overflow-wrap:anywhere}
+.analysis-empty{margin:0;color:#85877e;font-size:11px;font-style:italic}
 .threshold-control label{display:flex;justify-content:space-between;align-items:center}
 .threshold-control output{font:12px var(--mono);color:var(--purple);letter-spacing:0}
 .threshold-control input{width:100%;accent-color:var(--purple);cursor:pointer}
@@ -70,6 +81,8 @@
   .demo-action{width:100%;justify-items:stretch}
   .demo-action .button{justify-content:space-between}
   .connection-status{text-align:left}
+  .demo-result>div:nth-child(2){padding-right:0}
+  .analysis-tier dl{grid-template-columns:1fr}
   .threshold-control{width:100%}
   .pipeline-steps{padding:18px 14px}
   .main-track{grid-template-columns:minmax(0,1fr);gap:7px}

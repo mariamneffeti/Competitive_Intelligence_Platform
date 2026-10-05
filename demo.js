@@ -58,9 +58,23 @@ function unwrapResponse(payload) {
   return value;
 }
 
+function analysisFields(data) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return [];
+  return Object.entries(data).map(([key, value]) => {
+    const displayValue = value === null || value === undefined || value === ""
+      ? "Not provided"
+      : typeof value === "object"
+        ? JSON.stringify(value, null, 2)
+        : String(value);
+    return `<div class="analysis-field"><dt>${escapeHtml(key.replace(/[_-]/g, " "))}</dt><dd>${escapeHtml(displayValue)}</dd></div>`;
+  }).join("");
+}
+
 function renderResult(payload, sample, threshold, source, fallbackMessage = "") {
   const signal = payload.signal || {};
-  const tier1 = payload.tier1 || payload.analysis || {};
+  const tier1 = payload.tier1 || payload.analysis || Object.fromEntries(
+    ["confidence", "category", "severity", "summary"].filter((key) => payload[key] !== undefined).map((key) => [key, payload[key]]),
+  );
   const confidence = Number(payload.confidence ?? tier1.confidence);
   const selectedThreshold = Number(payload.threshold ?? threshold);
   const route = payload.route === "accepted" ? "accepted" : payload.route === "escalated" ? "escalated" : (confidence < selectedThreshold ? "escalated" : "accepted");
@@ -69,9 +83,14 @@ function renderResult(payload, sample, threshold, source, fallbackMessage = "") 
   const company = signal.company || payload.company || sample.company;
   const category = tier1.category || payload.category || sample.category;
   const severity = tier1.severity || payload.severity || sample.severity;
-  const summary = tier1.summary || payload.summary || sample.summary;
-  const tier2 = payload.tier2 || {};
-  const tier2Summary = tier2.summary ? `<p class="live-summary"><strong>Deeper review:</strong> ${escapeHtml(tier2.summary)}</p>` : "";
+  const tier2 = payload.tier2 || payload.tier2_analysis || (payload.tier2_status ? { status: payload.tier2_status } : null);
+  const tier1Fields = analysisFields(tier1);
+  const tier2Fields = analysisFields(tier2);
+  const analysisPanel = `<section class="analysis-details" aria-label="Returned analysis">
+    <h4>Returned analysis</h4>
+    <div class="analysis-tier"><h5>Tier 1</h5>${tier1Fields ? `<dl>${tier1Fields}</dl>` : `<p class="analysis-empty">No Tier 1 fields were returned.</p>`}</div>
+    <div class="analysis-tier"><h5>Tier 2</h5>${tier2Fields ? `<dl>${tier2Fields}</dl>` : `<p class="analysis-empty">No Tier 2 details were returned.</p>`}</div>
+    </section>`;
   const runId = payload.run_id || payload.request_id;
   const mode = source === "fallback" ? "LOCAL FALLBACK" : payload.mode === "mock" ? "API MOCK" : "LIVE n8n";
   setConnectionStatus(
@@ -82,7 +101,7 @@ function renderResult(payload, sample, threshold, source, fallbackMessage = "") 
   const symbol = escalated ? "↗" : "✓";
   result.innerHTML = `<div class="result-symbol">${symbol}</div>
     <div><p class="eyebrow">${escapeHtml(company.toUpperCase())} · ${escapeHtml(String(category).toUpperCase())} · ${escapeHtml(String(severity).toUpperCase())}</p>
-    <h3>${escapeHtml(headline)}</h3><p><strong>Tier 1 confidence: ${confidence.toFixed(2)}</strong> · Policy threshold: ${selectedThreshold.toFixed(2)}. ${escalated ? "Escalated for deeper review." : "Accepted by Tier 1."} ${escapeHtml(summary)}</p>${tier2Summary}${fallbackNote}${runId ? `<p class="run-id">Run ID: ${escapeHtml(runId)}</p>` : ""}</div>
+    <h3>${escapeHtml(headline)}</h3><p><strong>Tier 1 confidence: ${confidence.toFixed(2)}</strong> · Policy threshold: ${selectedThreshold.toFixed(2)}. ${escalated ? "Escalated for deeper review." : "Accepted by Tier 1."}</p>${analysisPanel}${fallbackNote}${runId ? `<p class="run-id">Run ID: ${escapeHtml(runId)}</p>` : ""}</div>
     <span class="result-badge ${escalated ? "escalate" : "accept"}">${mode} · ${escalated ? "ESCALATED" : "ACCEPTED"}</span>`;
   setSteps(route);
 }
