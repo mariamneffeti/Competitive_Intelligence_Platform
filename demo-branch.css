@@ -11,6 +11,17 @@
 .connection-status[data-state="live"]:before{background:#147e68}
 .connection-status[data-state="mock"]:before{background:#bd8334}
 .connection-status[data-state="fallback"]:before{background:#ce6548}
+.threshold-explainer{margin:0;font-size:10px;line-height:1.45;color:#777a71}
+.button-reset{padding:7px 0;background:transparent;color:#777a71;font-size:11px;text-decoration:underline;text-underline-offset:3px}
+.button-reset:hover{color:var(--ink);transform:none}
+.button:disabled{cursor:wait;opacity:.65;transform:none}
+.sample-evidence{margin:18px 26px 0;padding:16px 18px;background:#f8f8f3;border:1px solid #e6e6de}
+.evidence-heading{display:flex;justify-content:space-between;gap:16px;align-items:center}
+.evidence-heading .eyebrow{margin:0;font-size:8px}
+.evidence-heading>span,.evidence-source,.evidence-caption{font:9px var(--mono);color:#777a71}
+.evidence-source{margin:10px 0 5px;color:var(--purple)}
+.sample-evidence blockquote{margin:0;color:#30332d;font:500 13px/1.6 var(--sans)}
+.evidence-caption{margin:8px 0 0;font-size:8px}
 .demo-result{align-items:flex-start}
 .demo-result>div:nth-child(2){flex:1;min-width:0;padding-right:150px}
 .analysis-details{margin-top:18px;padding-top:14px;border-top:1px solid #deded5}
@@ -65,6 +76,7 @@
   .demo-controls{grid-template-columns:1fr 1fr}
   .threshold-control{grid-column:1}
   .demo-action{grid-column:2;grid-row:1/3;align-self:center}
+  .threshold-control{grid-column:1}
   .main-track{grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr);gap:10px 5px}
   .main-track>.pipe-step:nth-of-type(1){grid-column:1;grid-row:1}
   .main-track>i:nth-of-type(1){grid-column:2;grid-row:1}
@@ -81,6 +93,10 @@
   .demo-action{width:100%;justify-items:stretch}
   .demo-action .button{justify-content:space-between}
   .connection-status{text-align:left}
+  .sample-evidence{margin:14px 16px 0;padding:14px}
+  .evidence-heading{align-items:flex-start}
+  .evidence-heading .eyebrow{line-height:1.5}
+  .demo-action .button-reset{justify-content:flex-start}
   .demo-result>div:nth-child(2){padding-right:0}
   .analysis-tier dl{grid-template-columns:1fr}
   .threshold-control{width:100%}

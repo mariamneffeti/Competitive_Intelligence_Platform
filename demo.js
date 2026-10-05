@@ -1,11 +1,12 @@
 const samples = {
-  high: { company: "Northstar", headline: "Northstar launches a new analytics tier", confidence: 0.93, category: "Product launch", severity: "Medium", summary: "A new analytics tier may expand Northstar's offering for larger customers." },
-  mid: { company: "Pioneer", headline: "Pioneer hires a VP of enterprise sales", confidence: 0.80, category: "Hiring signal", severity: "Moderate", summary: "The senior sales hire may signal investment in enterprise growth, but does not confirm a broader strategy on its own." },
-  low: { company: "Meridian", headline: "Meridian announces a regional partnership", confidence: 0.68, category: "Partnership", severity: "Needs review", summary: "The announcement is brief; the market impact and partnership scope are unclear." },
+  high: { company: "Northstar", headline: "Northstar launches a new analytics tier", confidence: 0.93, category: "Product launch", severity: "Medium", summary: "A new analytics tier may expand Northstar's offering for larger customers.", source: "Northstar newsroom · fictional", date: "2025-04-14", excerpt: "Northstar introduced an expanded analytics tier for teams managing multiple business units." },
+  mid: { company: "Pioneer", headline: "Pioneer hires a VP of enterprise sales", confidence: 0.80, category: "Hiring signal", severity: "Moderate", summary: "The senior sales hire may signal investment in enterprise growth, but does not confirm a broader strategy on its own.", source: "Pioneer careers update · fictional", date: "2025-03-28", excerpt: "Pioneer named a new vice president to lead its enterprise sales organization." },
+  low: { company: "Meridian", headline: "Meridian announces a regional partnership", confidence: 0.68, category: "Partnership", severity: "Needs review", summary: "The announcement is brief; the market impact and partnership scope are unclear.", source: "Meridian company blog · fictional", date: "2025-02-06", excerpt: "Meridian announced a regional partnership but did not share its scope, timing, or commercial terms." },
 };
 
 const runButton = document.querySelector("#run-demo");
 const runLabel = document.querySelector("#run-label");
+const resetButton = document.querySelector("#reset-demo");
 const connectionStatus = document.querySelector("#connection-status");
 const selector = document.querySelector("#signal-select");
 const thresholdInput = document.querySelector("#threshold-input");
@@ -13,6 +14,7 @@ const thresholdValue = document.querySelector("#threshold-value");
 const gateCaption = document.querySelector("#gate-caption");
 const tier2State = document.querySelector("#tier2-state");
 const result = document.querySelector("#demo-result");
+const evidencePanel = document.querySelector(".sample-evidence");
 const steps = [...document.querySelectorAll(".pipe-step")];
 const branchTrack = document.querySelector(".branch-track");
 const API_URL = (document.querySelector('meta[name="demo-api-url"]')?.content || "/api/run").trim();
@@ -28,6 +30,27 @@ function updateThreshold() {
   const threshold = currentThreshold().toFixed(2);
   thresholdValue.textContent = threshold;
   gateCaption.textContent = `threshold ${threshold}`;
+}
+
+function updateEvidence() {
+  const sample = samples[selector.value];
+  evidencePanel.innerHTML = `<div class="evidence-heading"><p class="eyebrow">SYNTHETIC SOURCE EVIDENCE</p><span>${escapeHtml(sample.date)}</span></div>
+    <p class="evidence-source">${escapeHtml(sample.source)}</p><blockquote>“${escapeHtml(sample.excerpt)}”</blockquote>
+    <p class="evidence-caption">Fictional example included to illustrate the kind of source text analyzed.</p>`;
+}
+
+function resetDemo() {
+  selector.value = "high";
+  thresholdInput.value = "0.85";
+  updateThreshold();
+  updateEvidence();
+  branchTrack.classList.remove("is-escalated", "is-accepted");
+  tier2State.textContent = "conditional";
+  tier2State.classList.remove("state-skipped");
+  steps.forEach((step) => step.classList.remove("active", "done", "skipped"));
+  steps[0].classList.add("active");
+  result.innerHTML = `<div class="result-symbol">✳</div><div><p class="eyebrow">READY WHEN YOU ARE</p><h3>Select a signal and run the demo.</h3><p>The completed result will show the returned analysis and routing decision.</p></div><span class="result-badge">READY</span>`;
+  setConnectionStatus("Ready · proxy configured", "idle");
 }
 
 function setSteps(route) {
@@ -108,8 +131,11 @@ function renderResult(payload, sample, threshold, source, fallbackMessage = "") 
 
 async function runDemo() {
   runButton.disabled = true;
+  resetButton.disabled = true;
+  selector.disabled = true;
+  thresholdInput.disabled = true;
   runLabel.textContent = "Running live demo…";
-  setConnectionStatus("Connecting to demo API…", "connecting");
+  setConnectionStatus("Request in progress · waiting for backend response…", "connecting");
   branchTrack.classList.remove("is-escalated", "is-accepted");
   tier2State.textContent = "waiting for result";
   tier2State.classList.remove("state-skipped");
@@ -133,29 +159,46 @@ async function runDemo() {
       body: JSON.stringify({ sample_id: sampleId, threshold }),
       signal: AbortSignal.timeout(65000),
     });
-    if (!response.ok) throw new Error(`Demo API returned ${response.status}`);
-    const rawPayload = await response.json();
+    if (!response.ok) {
+      let apiMessage = "";
+      try {
+        const errorPayload = await response.json();
+        apiMessage = errorPayload.error || errorPayload.message || "";
+      } catch { /* The HTTP status still identifies the API error. */ }
+      throw new Error(`API returned HTTP ${response.status}${apiMessage ? `: ${apiMessage}` : "."}`);
+    }
+    let rawPayload;
+    try {
+      rawPayload = await response.json();
+    } catch {
+      throw new Error("Incomplete response: the API did not return valid JSON.");
+    }
     const payload = unwrapResponse(rawPayload);
-    if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new Error("Backend response was not a result object");
-    if (!Number.isFinite(Number(payload.confidence ?? payload.tier1?.confidence))) throw new Error("Backend response is missing Tier 1 confidence");
-    if (!["accepted", "escalated"].includes(payload.route)) throw new Error("Backend response is missing a valid route");
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new Error("Incomplete response: expected a result object.");
+    if (!Number.isFinite(Number(payload.confidence ?? payload.tier1?.confidence ?? payload.analysis?.confidence))) throw new Error("Incomplete response: Tier 1 confidence is missing.");
+    if (!["accepted", "escalated"].includes(payload.route)) throw new Error("Incomplete response: route must be accepted or escalated.");
     renderResult(payload, sample, threshold, "api");
   } catch (error) {
-    // Local fixtures are only used when the backend cannot return a usable result.
     const fallbackError = error.name === "AbortError" || error.name === "TimeoutError"
-      ? "The request timed out."
-      : error.message === "Failed to fetch"
-        ? "Check the API URL, CORS origin, and network connection."
+      ? "Request timed out before the backend responded."
+      : error instanceof TypeError
+        ? "Could not reach the API. Check the proxy URL, CORS origin, and network connection."
         : error.message;
     setConnectionStatus(`Local fallback · ${fallbackError}`, "fallback");
     renderResult({ ...sample, route: sample.confidence < threshold ? "escalated" : "accepted", threshold }, sample, threshold, "fallback", fallbackError);
   } finally {
     runButton.disabled = false;
+    resetButton.disabled = false;
+    selector.disabled = false;
+    thresholdInput.disabled = false;
     runLabel.textContent = "Run demo";
   }
 }
 
 thresholdInput.addEventListener("input", updateThreshold);
+selector.addEventListener("change", updateEvidence);
+resetButton.addEventListener("click", resetDemo);
 runButton.addEventListener("click", runDemo);
 updateThreshold();
+updateEvidence();
 document.querySelector("#year").textContent = new Date().getFullYear();

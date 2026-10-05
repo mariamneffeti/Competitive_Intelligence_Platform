@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="site.css">
   <link rel="stylesheet" href="demo-branch.css">
   <link rel="stylesheet" href="schema.css">
-  <script src="demo.js?v=3" defer></script>
+  <script src="demo.js?v=4" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -70,7 +70,8 @@
     <section class="demo-section" id="demo">
       <div class="demo-head"><div><p class="eyebrow">02 / LIVE WORKFLOW DEMO</p><h2>Follow a signal through the pipeline.</h2><p>Run a synthetic signal through the demo API and n8n workflow. If the API is unavailable, the page shows a clearly labeled local mock result.</p></div><div class="demo-stamp">SYNTHETIC<br>DATA ONLY</div></div>
       <div class="demo-app">
-        <div class="demo-controls"><div class="signal-control"><label for="signal-select">CHOOSE A SAMPLE SIGNAL</label><select id="signal-select"><option value="high">Northstar launches a new analytics tier</option><option value="mid">Pioneer hires a VP of enterprise sales</option><option value="low">Meridian announces a regional partnership</option></select></div><div class="threshold-control"><label for="threshold-input">TIER 2 THRESHOLD <output id="threshold-value" for="threshold-input">0.85</output></label><input id="threshold-input" type="range" min="0.50" max="0.99" step="0.01" value="0.85"><div class="range-hints"><span>0.50 · fewer escalations</span><span>0.99 · more scrutiny</span></div></div><div class="demo-action"><button id="run-demo" class="button button-dark" type="button"><span id="run-label">Run demo</span><span aria-hidden="true">↗</span></button><p id="connection-status" class="connection-status" role="status" aria-live="polite" data-state="idle">Ready · proxy configured</p></div></div>
+        <div class="demo-controls"><div class="signal-control"><label for="signal-select">CHOOSE A SAMPLE SIGNAL</label><select id="signal-select"><option value="high">Northstar launches a new analytics tier</option><option value="mid">Pioneer hires a VP of enterprise sales</option><option value="low">Meridian announces a regional partnership</option></select></div><div class="threshold-control"><label for="threshold-input">TIER 2 THRESHOLD <output id="threshold-value" for="threshold-input">0.85</output></label><input id="threshold-input" type="range" min="0.50" max="0.99" step="0.01" value="0.85"><div class="range-hints"><span>0.50 · fewer escalations</span><span>0.99 · more scrutiny</span></div><p class="threshold-explainer">For the selected signal, confidence below this threshold routes the result to Tier 2.</p></div><div class="demo-action"><button id="run-demo" class="button button-dark" type="button"><span id="run-label">Run demo</span><span aria-hidden="true">↗</span></button><button id="reset-demo" class="button button-reset" type="button">Reset demo</button><p id="connection-status" class="connection-status" role="status" aria-live="polite" data-state="idle">Ready · proxy configured</p></div></div>
+        <section class="sample-evidence" aria-label="Selected synthetic signal source and evidence"></section>
         <div class="pipeline-steps" aria-label="Pipeline stages">
           <div class="main-track">
             <div class="pipe-step active" data-step="0"><span>01</span><b>Ingest</b><small>source captured</small></div><i aria-hidden="true">→</i>
