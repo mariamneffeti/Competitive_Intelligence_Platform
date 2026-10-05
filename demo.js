@@ -6,6 +6,7 @@ const samples = {
 
 const runButton = document.querySelector("#run-demo");
 const runLabel = document.querySelector("#run-label");
+const connectionStatus = document.querySelector("#connection-status");
 const selector = document.querySelector("#signal-select");
 const thresholdInput = document.querySelector("#threshold-input");
 const thresholdValue = document.querySelector("#threshold-value");
@@ -17,6 +18,11 @@ const branchTrack = document.querySelector(".branch-track");
 const API_URL = (document.querySelector('meta[name="demo-api-url"]')?.content || "/api/run").trim();
 
 function currentThreshold() { return Number(thresholdInput.value); }
+
+function setConnectionStatus(message, state) {
+  connectionStatus.textContent = message;
+  connectionStatus.dataset.state = state;
+}
 
 function updateThreshold() {
   const threshold = currentThreshold().toFixed(2);
@@ -68,6 +74,10 @@ function renderResult(payload, sample, threshold, source, fallbackMessage = "") 
   const tier2Summary = tier2.summary ? `<p class="live-summary"><strong>Deeper review:</strong> ${escapeHtml(tier2.summary)}</p>` : "";
   const runId = payload.run_id || payload.request_id;
   const mode = source === "fallback" ? "LOCAL FALLBACK" : payload.mode === "mock" ? "API MOCK" : "LIVE n8n";
+  setConnectionStatus(
+    source === "fallback" ? "Local fallback · backend unavailable" : payload.mode === "mock" ? "Connected · backend mock mode" : "Connected · live workflow",
+    source === "fallback" ? "fallback" : payload.mode === "mock" ? "mock" : "live",
+  );
   const fallbackNote = source === "fallback" ? `<p class="fallback-note">Backend unavailable; showing local mock data. ${escapeHtml(fallbackMessage)}</p>` : "";
   const symbol = escalated ? "↗" : "✓";
   result.innerHTML = `<div class="result-symbol">${symbol}</div>
@@ -80,6 +90,7 @@ function renderResult(payload, sample, threshold, source, fallbackMessage = "") 
 async function runDemo() {
   runButton.disabled = true;
   runLabel.textContent = "Running live demo…";
+  setConnectionStatus("Connecting to demo API…", "connecting");
   branchTrack.classList.remove("is-escalated", "is-accepted");
   tier2State.textContent = "waiting for result";
   tier2State.classList.remove("state-skipped");
@@ -117,6 +128,7 @@ async function runDemo() {
       : error.message === "Failed to fetch"
         ? "Check the API URL, CORS origin, and network connection."
         : error.message;
+    setConnectionStatus(`Local fallback · ${fallbackError}`, "fallback");
     renderResult({ ...sample, route: sample.confidence < threshold ? "escalated" : "accepted", threshold }, sample, threshold, "fallback", fallbackError);
   } finally {
     runButton.disabled = false;
